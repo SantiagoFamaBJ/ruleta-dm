@@ -62,6 +62,10 @@ const TEXT_GROUPS: { title: string; hint?: string; fields: [keyof Texts, string,
       ['cta', 'Botón que lleva a dentalmedrano.com', false],
       ['ctaInstagram', 'Botón que lleva a Instagram', false],
       ['close', 'Botón para cerrar', false],
+      ['titleRetry', 'Título cuando sale "Intentá de nuevo"', false],
+      ['retryKicker', 'Frase cuando sale "Intentá de nuevo"', false],
+      ['retryNote', 'Mensaje cuando sale "Intentá de nuevo"', false],
+      ['retryButton', 'Botón para volver a girar', false],
     ],
   },
 ];
@@ -193,9 +197,9 @@ export default function AdminPage() {
     setConfig((c) => ({ ...c, texts: { ...c.texts, [key]: value } }));
   }
 
-  function setPrize(index: number, value: string) {
+  function setPrize(id: string, value: string) {
     setSaved('');
-    setConfig((c) => ({ ...c, prizes: c.prizes.map((p, i) => (i === index ? value : p)) }));
+    setConfig((c) => ({ ...c, prizes: { ...c.prizes, [id]: value } }));
   }
 
   async function saveConfig() {
@@ -326,13 +330,13 @@ export default function AdminPage() {
 
             <h2 className="mt-10 font-heading text-xl font-extrabold">Premios de cada gajo</h2>
             <div className="mt-4 grid gap-5 sm:grid-cols-2">
-              {SLICES.map((slice, i) => {
-                if (slice.type === 'seguir') return null;
-                const n = SLICES.slice(0, i + 1).filter((x) => x.type === slice.type).length;
+              {SLICES.map((slice) => {
+                if (slice.type === 'seguir' || slice.type === 'reintentar') return null;
+                const n = slice.id.split('-')[1];
                 const name = slice.type === 'coltene' ? 'COLTENE' : slice.type === 'densell' ? 'Densell' : '10% OFF';
                 return (
-                  <div key={i}>
-                    <label className="dm-label" htmlFor={`p-${i}`}>
+                  <div key={slice.id}>
+                    <label className="dm-label" htmlFor={`p-${slice.id}`}>
                       <span
                         className="mr-2 inline-block h-3 w-3 rounded-full align-middle"
                         style={{ background: COLORS[slice.type].bg }}
@@ -340,11 +344,11 @@ export default function AdminPage() {
                       {name} {n}
                     </label>
                     <input
-                      id={`p-${i}`}
+                      id={`p-${slice.id}`}
                       className="dm-input"
                       maxLength={80}
-                      value={config.prizes[i]}
-                      onChange={(e) => setPrize(i, e.target.value)}
+                      value={config.prizes[slice.id] ?? ''}
+                      onChange={(e) => setPrize(slice.id, e.target.value)}
                     />
                   </div>
                 );

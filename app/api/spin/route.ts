@@ -9,8 +9,8 @@ function json(body: unknown, status = 200): Response {
   return Response.json(body, { status, headers: { 'Cache-Control': 'no-store' } });
 }
 
-function resultOf(index: number, prize: string) {
-  return { index, type: SLICES[index].type, prize };
+function resultOf(index: number, type: string, prize: string) {
+  return { index, type, prize };
 }
 
 function duplicate(field: 'email' | 'celular') {
@@ -51,9 +51,9 @@ export async function POST(req: Request): Promise<Response> {
     // Reintento del mismo giro (por ejemplo, se cortó internet justo al responder):
     // se devuelve el mismo resultado en vez de sortear de nuevo.
     if (!checkOnly) {
-      const { data: prev, error } = await supabase.from(TABLE).select('gajo, premio').eq('token', token).maybeSingle();
+      const { data: prev, error } = await supabase.from(TABLE).select('gajo, premio, premio_tipo').eq('token', token).maybeSingle();
       if (error) throw error;
-      if (prev) return json(resultOf(prev.gajo - 1, prev.premio));
+      if (prev) return json(resultOf(prev.gajo - 1, prev.premio_tipo, prev.premio));
     }
 
     // ¿Ya participó con este mail o este celular?
@@ -70,7 +70,11 @@ export async function POST(req: Request): Promise<Response> {
 
     const index = randomInt(SLICES.length);
     const slice = SLICES[index];
-    const prize = (await loadConfig()).prizes[index]; // nombre del premio cargado en /admin
+
+    // "Intentá de nuevo": no se guarda nada y la persona vuelve a girar (el mail y el celular siguen libres)
+    if (slice.type === 'reintentar') return json(resultOf(index, slice.type, ''));
+
+    const prize = (await loadConfig()).prizes[slice.id]; // nombre del premio cargado en /admin
 
     const { error: insertError } = await supabase.from(TABLE).insert({
       nombre: p.nombre,
@@ -90,14 +94,14 @@ export async function POST(req: Request): Promise<Response> {
     if (insertError) {
       // 23505 = valor repetido. Puede ser el mismo giro reintentado o alguien que participó justo en paralelo.
       if (insertError.code === '23505') {
-        const { data: again } = await supabase.from(TABLE).select('gajo, premio').eq('token', token).maybeSingle();
-        if (again) return json(resultOf(again.gajo - 1, again.premio));
+        const { data: again } = await supabase.from(TABLE).select('gajo, premio, premio_tipo').eq('token', token).maybeSingle();
+        if (again) return json(resultOf(again.gajo - 1, again.premio_tipo, again.premio));
         return json(duplicate(/celular/.test(insertError.message) ? 'celular' : 'email'), 409);
       }
       throw insertError;
     }
 
-    return json(resultOf(index, prize));
+    return json(resultOf(index, slice.type, prize));
   } catch (err) {
     console.error('[ruleta] /api/spin', err);
     if (err instanceof Error && err.message === 'CONFIG_SUPABASE') {

@@ -42,6 +42,7 @@ export default function RuletaApp({ config }: { config: RuletaConfig }) {
   const [result, setResult] = useState<SpinResult | null>(null);
   const [showPrize, setShowPrize] = useState(false);
   const [formKey, setFormKey] = useState(0);
+  const [retryKey, setRetryKey] = useState(0);
 
   function handleReady(input: ParticipantInput, clean: CleanParticipant) {
     setValues(input);
@@ -87,6 +88,15 @@ export default function RuletaApp({ config }: { config: RuletaConfig }) {
     }
   }
 
+  /** Salió "Intentá de nuevo": misma persona, otra tirada */
+  function retry() {
+    setShowPrize(false);
+    setResult(null);
+    setToken(newToken());
+    setSpinError('');
+    setRetryKey((k) => k + 1);
+  }
+
   /** Listo para el siguiente participante */
   function reset() {
     setStep('form');
@@ -122,7 +132,7 @@ export default function RuletaApp({ config }: { config: RuletaConfig }) {
             <h1 className="headline-sm">{fillName(config.texts.greeting, person?.nombre ?? '')}</h1>
             <p className="screen-sub">{config.texts.spinHint}</p>
 
-            <Wheel onSpin={handleSpin} onStop={() => setShowPrize(true)} />
+            <Wheel onSpin={handleSpin} onStop={() => setShowPrize(true)} resetKey={retryKey} />
 
             {spinError && (
               <p role="alert" className="dm-notice" style={{ marginTop: 24 }}>
@@ -146,6 +156,7 @@ export default function RuletaApp({ config }: { config: RuletaConfig }) {
           prize={result.prize}
           texts={config.texts}
           onClose={reset}
+          onRetry={retry}
         />
       )}
     </div>

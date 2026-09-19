@@ -12,6 +12,8 @@ interface WheelProps {
   onSpin: () => Promise<number | null>;
   /** Se llama cuando la ruleta terminó de frenar. */
   onStop: (index: number) => void;
+  /** Cada vez que cambia, la ruleta queda lista para otra tirada (sin volver a la posición inicial) */
+  resetKey?: number;
 }
 
 // Destellos alrededor de la ruleta (posición en % del tamaño, tamaño en px, demora en s)
@@ -24,9 +26,10 @@ const SPARKS = [
   { left: '84%', top: '-1%', size: 16, delay: 1.5 },
 ];
 
-export default function Wheel({ onSpin, onStop }: WheelProps) {
+export default function Wheel({ onSpin, onStop, resetKey = 0 }: WheelProps) {
   const [rotation, setRotation] = useState(0);
   const [phase, setPhase] = useState<Phase>('idle');
+  const [seenReset, setSeenReset] = useState(resetKey);
   const winner = useRef<number | null>(null);
   const finished = useRef(false);
   const onStopRef = useRef(onStop);
@@ -35,6 +38,11 @@ export default function Wheel({ onSpin, onStop }: WheelProps) {
 
   const logoFor = (type: PrizeType): string | null =>
     type === 'coltene' && coltenLogo ? LOGOS.coltene : type === 'densell' && densellLogo ? LOGOS.densell : null;
+
+  if (seenReset !== resetKey) {
+    setSeenReset(resetKey);
+    setPhase('idle');
+  }
 
   useEffect(() => {
     onStopRef.current = onStop;

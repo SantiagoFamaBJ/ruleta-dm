@@ -3,9 +3,11 @@
  * Los textos y los nombres de los premios también se pueden cambiar desde /admin.
  */
 
-export type PrizeType = 'coltene' | 'densell' | 'seguir' | 'descuento';
+export type PrizeType = 'coltene' | 'densell' | 'seguir' | 'descuento' | 'reintentar';
 
 export interface Slice {
+  /** Identificador fijo del gajo (así los premios cargados en /admin no se mezclan si cambia el orden) */
+  id: string;
   /** Categoría del gajo (define el color) */
   type: PrizeType;
   /** Texto que se ve dentro del gajo (si no hay logo), una línea por elemento */
@@ -20,6 +22,7 @@ export const COLORS: Record<PrizeType, { bg: string; fg: string }> = {
   densell: { bg: '#F15922', fg: '#FFFFFF' }, // naranja Dental Medrano
   seguir: { bg: '#7B4BB7', fg: '#FFFFFF' }, // violeta
   descuento: { bg: '#FFC629', fg: '#262626' }, // amarillo
+  reintentar: { bg: '#1E9E6A', fg: '#FFFFFF' }, // verde: "Intentá de nuevo"
 };
 
 /** Link del botón y del QR del pop-up (el QR es el archivo public/qr-web.svg: si cambiás el link, hay que regenerarlo) */
@@ -42,22 +45,23 @@ export const LOGOS = {
  */
 export const LOGO_STYLE: 'blanco' | 'original' = 'blanco';
 
-/** Los 12 gajos, en orden (arrancan arriba y siguen en sentido horario). Todos tienen 1 chance de 12. */
+/**
+ * Los 12 gajos, en orden (arrancan arriba y siguen en sentido horario). Todos tienen 1 chance de 12.
+ * 2 COLTENE, 2 Densell, 2 de 10% OFF, 3 "Seguí participando" y 3 "Intentá de nuevo" (que da otra tirada).
+ */
 export const SLICES: Slice[] = [
-  { type: 'coltene', label: ['COLTENE'], prize: 'Premio COLTENE 1' },
-  { type: 'densell', label: ['DENSELL'], prize: 'Premio Densell 1' },
-  { type: 'seguir', label: ['SEGUÍ', 'PARTICIPANDO'], prize: 'Seguí participando' },
-  { type: 'descuento', label: ['10% OFF'], prize: '10% de descuento' },
-
-  { type: 'coltene', label: ['COLTENE'], prize: 'Premio COLTENE 2' },
-  { type: 'densell', label: ['DENSELL'], prize: 'Premio Densell 2' },
-  { type: 'seguir', label: ['SEGUÍ', 'PARTICIPANDO'], prize: 'Seguí participando' },
-  { type: 'descuento', label: ['10% OFF'], prize: '10% de descuento' },
-
-  { type: 'coltene', label: ['COLTENE'], prize: 'Premio COLTENE 3' },
-  { type: 'densell', label: ['DENSELL'], prize: 'Premio Densell 3' },
-  { type: 'seguir', label: ['SEGUÍ', 'PARTICIPANDO'], prize: 'Seguí participando' },
-  { type: 'descuento', label: ['10% OFF'], prize: '10% de descuento' },
+  { id: 'coltene-1', type: 'coltene', label: ['COLTENE'], prize: 'Premio COLTENE 1' },
+  { id: 'reintentar-1', type: 'reintentar', label: ['INTENTÁ', 'DE NUEVO'], prize: 'Intentá de nuevo' },
+  { id: 'densell-1', type: 'densell', label: ['DENSELL'], prize: 'Premio Densell 1' },
+  { id: 'seguir-1', type: 'seguir', label: ['SEGUÍ', 'PARTICIPANDO'], prize: 'Seguí participando' },
+  { id: 'descuento-1', type: 'descuento', label: ['10% OFF'], prize: '10% de descuento' },
+  { id: 'reintentar-2', type: 'reintentar', label: ['INTENTÁ', 'DE NUEVO'], prize: 'Intentá de nuevo' },
+  { id: 'coltene-2', type: 'coltene', label: ['COLTENE'], prize: 'Premio COLTENE 2' },
+  { id: 'seguir-2', type: 'seguir', label: ['SEGUÍ', 'PARTICIPANDO'], prize: 'Seguí participando' },
+  { id: 'densell-2', type: 'densell', label: ['DENSELL'], prize: 'Premio Densell 2' },
+  { id: 'reintentar-3', type: 'reintentar', label: ['INTENTÁ', 'DE NUEVO'], prize: 'Intentá de nuevo' },
+  { id: 'descuento-2', type: 'descuento', label: ['10% OFF'], prize: '10% de descuento' },
+  { id: 'seguir-3', type: 'seguir', label: ['SEGUÍ', 'PARTICIPANDO'], prize: 'Seguí participando' },
 ];
 
 export const OCUPACION_ODONTOLOGO = 'Odontólogo/a';
@@ -102,6 +106,10 @@ export interface Texts {
   close: string;
   bases: string;
   ctaInstagram: string;
+  titleRetry: string;
+  retryKicker: string;
+  retryNote: string;
+  retryButton: string;
 }
 
 const DEFAULT_BASES = `BASES Y CONDICIONES - RULETA DE PREMIOS
@@ -114,7 +122,7 @@ La acción "Ruleta de premios" es organizada por Dental Medrano (el "Organizador
 Pueden participar personas mayores de 18 años que completen el formulario con datos verdaderos y acepten estas bases. Cada persona participa una sola vez: no se admite más de una participación con el mismo mail o el mismo celular.
 
 3. Cómo se participa
-Se completan los datos del formulario, se aceptan estas bases y se gira la ruleta una vez. El resultado lo define el sistema de manera aleatoria, no puede modificarse y todos los casilleros de la ruleta tienen la misma probabilidad de salir.
+Se completan los datos del formulario, se aceptan estas bases y se gira la ruleta una vez. El resultado lo define el sistema de manera aleatoria, no puede modificarse y todos los casilleros de la ruleta tienen la misma probabilidad de salir. Si sale "Intentá de nuevo", la persona puede girar una vez más.
 
 4. Premios
 La ruleta puede dar un premio de las marcas COLTENE o Densell, un descuento del 10% en Dental Medrano, o el resultado "Seguí participando", que no otorga premio. Los premios se retiran en el local, en el momento, mostrando al personal de Dental Medrano la pantalla con el resultado. No son canjeables por dinero ni transferibles. El descuento del 10% se aplica según las condiciones que informe el personal del local al momento de la entrega.
@@ -151,6 +159,10 @@ export const DEFAULT_TEXTS: Texts = {
   close: 'Listo',
   bases: DEFAULT_BASES,
   ctaInstagram: 'Seguinos en Instagram',
+  titleRetry: '¡Intentá de nuevo!',
+  retryKicker: '¡Casi, {nombre}!',
+  retryNote: 'Tenés otra tirada. ¡Girá de nuevo!',
+  retryButton: 'Girar otra vez',
 };
 
 export const TEXT_LIMITS: Record<keyof Texts, number> = {
@@ -174,6 +186,10 @@ export const TEXT_LIMITS: Record<keyof Texts, number> = {
   close: 20,
   bases: 8000,
   ctaInstagram: 40,
+  titleRetry: 50,
+  retryKicker: 50,
+  retryNote: 100,
+  retryButton: 30,
 };
 
 /** Reemplaza {nombre} por el nombre de la persona */
@@ -183,13 +199,13 @@ export function fillName(text: string, name: string): string {
 
 export interface RuletaConfig {
   texts: Texts;
-  /** Un premio por gajo, en el mismo orden que SLICES */
-  prizes: string[];
+  /** Nombre del premio de cada gajo, por id (ver SLICES) */
+  prizes: Record<string, string>;
 }
 
 export const DEFAULT_CONFIG: RuletaConfig = {
   texts: DEFAULT_TEXTS,
-  prizes: SLICES.map((s) => s.prize),
+  prizes: Object.fromEntries(SLICES.map((s) => [s.id, s.prize])),
 };
 
 /** Toma lo que venga (base de datos o formulario del admin) y devuelve una config siempre válida */
@@ -203,11 +219,21 @@ export function normalizeConfig(input: unknown): RuletaConfig {
     if (typeof v === 'string' && v.trim()) texts[key] = v.trim().slice(0, TEXT_LIMITS[key]);
   }
 
-  const rawPrizes = Array.isArray(src.prizes) ? src.prizes : [];
-  const prizes = SLICES.map((s, i) => {
-    const v = rawPrizes[i];
-    return typeof v === 'string' && v.trim() ? v.trim().slice(0, 80) : s.prize;
-  });
+  // Formato anterior: una lista de 12 premios en el orden viejo de la ruleta
+  const LEGACY_IDS = ['coltene-1', 'densell-1', null, 'descuento-1', 'coltene-2', 'densell-2', null, 'descuento-2', 'coltene-3', 'densell-3', null, 'descuento-3'];
+  const byId: Record<string, string> = {};
+  if (Array.isArray(src.prizes)) {
+    src.prizes.forEach((v, i) => {
+      const id = LEGACY_IDS[i];
+      if (id && typeof v === 'string' && v.trim()) byId[id] = v.trim();
+    });
+  } else if (src.prizes && typeof src.prizes === 'object') {
+    for (const [id, v] of Object.entries(src.prizes as Record<string, unknown>)) {
+      if (typeof v === 'string' && v.trim()) byId[id] = v.trim();
+    }
+  }
+  const prizes: Record<string, string> = {};
+  for (const slice of SLICES) prizes[slice.id] = (byId[slice.id] ?? slice.prize).slice(0, 80);
 
   return { texts, prizes };
 }

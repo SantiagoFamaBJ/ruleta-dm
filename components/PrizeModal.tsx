@@ -9,7 +9,10 @@ interface Props {
   type: PrizeType;
   prize: string;
   texts: Texts;
+  /** Cierra el pop-up y deja el formulario listo para la próxima persona */
   onClose: () => void;
+  /** Sale "Intentá de nuevo": vuelve a la ruleta para otra tirada */
+  onRetry: () => void;
 }
 
 const CONFETTI_COLORS = ['#F15922', '#00A3E0', '#7B4BB7', '#FFC629', '#FFFFFF'];
@@ -52,16 +55,19 @@ function Confetti() {
   );
 }
 
-export default function PrizeModal({ name, type, prize, texts, onClose }: Props) {
+export default function PrizeModal({ name, type, prize, texts, onClose, onRetry }: Props) {
   const button = useRef<HTMLButtonElement>(null);
   const color = COLORS[type];
-  const won = type !== 'seguir';
+  const retry = type === 'reintentar';
+  const won = type !== 'seguir' && !retry;
   const titles: Record<PrizeType, string> = {
     coltene: texts.titleColtene,
     densell: texts.titleDensell,
     descuento: texts.titleDescuento,
     seguir: texts.titleSeguir,
+    reintentar: texts.titleRetry,
   };
+  const kicker = retry ? texts.retryKicker : won ? texts.winKicker : texts.loseKicker;
   const logoSrc = type === 'coltene' ? LOGOS.coltene : type === 'densell' ? LOGOS.densell : '';
   const logoOk = useImageOk(logoSrc || LOGOS.dm);
   const showLogo = Boolean(logoSrc) && logoOk;
@@ -89,29 +95,39 @@ export default function PrizeModal({ name, type, prize, texts, onClose }: Props)
               style={LOGO_STYLE === 'blanco' ? { filter: 'brightness(0) invert(1) drop-shadow(0 1px 2px rgb(0 0 0 / 0.3))' } : undefined}
             />
           )}
-          <p className="modal-kicker">{fillName(won ? texts.winKicker : texts.loseKicker, name)}</p>
+          <p className="modal-kicker">{fillName(kicker, name)}</p>
           <h2 id="prize-title" className="modal-title">
             {titles[type]}
           </h2>
         </div>
-        <div className="modal-body">
-          {won && <p className="modal-prize">{prize}</p>}
-          <p className="modal-note">{won ? texts.redeem : texts.lost}</p>
-          <div className="modal-cta">
-            <p className="modal-cta-note">{texts.ctaNote}</p>
-            <div className="modal-cta-buttons">
-              <a className="dm-btn dm-btn--ghost dm-btn--cta" href={WEB_URL} target="_blank" rel="noopener noreferrer">
-                {texts.cta}
-              </a>
-              <a className="dm-btn dm-btn--ghost dm-btn--cta" href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
-                {texts.ctaInstagram}
-              </a>
-            </div>
+
+        {retry ? (
+          <div className="modal-body">
+            <p className="modal-note">{texts.retryNote}</p>
+            <button ref={button} type="button" className="dm-btn" onClick={onRetry}>
+              {texts.retryButton}
+            </button>
           </div>
-          <button ref={button} type="button" className="dm-btn" onClick={onClose}>
-            {texts.close}
-          </button>
-        </div>
+        ) : (
+          <div className="modal-body">
+            {won && <p className="modal-prize">{prize}</p>}
+            <p className="modal-note">{won ? texts.redeem : texts.lost}</p>
+            <div className="modal-cta">
+              <p className="modal-cta-note">{texts.ctaNote}</p>
+              <div className="modal-cta-buttons">
+                <a className="dm-btn dm-btn--ghost dm-btn--cta" href={WEB_URL} target="_blank" rel="noopener noreferrer">
+                  {texts.cta}
+                </a>
+                <a className="dm-btn dm-btn--ghost dm-btn--cta" href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
+                  {texts.ctaInstagram}
+                </a>
+              </div>
+            </div>
+            <button ref={button} type="button" className="dm-btn" onClick={onClose}>
+              {texts.close}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
