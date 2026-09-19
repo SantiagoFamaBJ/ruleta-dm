@@ -1,0 +1,5 @@
+Acá van los logos en PNG con fondo transparente:
+  dm.png       -> logo de Dental Medrano (arriba de todo)
+  coltene.png  -> logo de COLTENE (gajos de la ruleta y pop-up)
+  densell.png  -> logo de Densell (gajos de la ruleta y pop-up)
+Si falta alguno, la app muestra el nombre en texto.
