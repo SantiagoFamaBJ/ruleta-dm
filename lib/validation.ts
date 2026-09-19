@@ -102,3 +102,56 @@ export function validateParticipant(input: unknown): ValidationResult {
     },
   };
 }
+
+/* ------------------------- Corrector de mails mal escritos ------------------------- */
+
+const KNOWN_DOMAINS = [
+  'gmail.com',
+  'hotmail.com',
+  'hotmail.com.ar',
+  'outlook.com',
+  'outlook.com.ar',
+  'yahoo.com',
+  'yahoo.com.ar',
+  'live.com',
+  'live.com.ar',
+  'icloud.com',
+  'me.com',
+  'mac.com',
+  'msn.com',
+  'mail.com',
+  'ymail.com',
+  'aol.com',
+  'protonmail.com',
+];
+
+function distance(a: string, b: string): number {
+  const prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    let diagonal = prev[0];
+    prev[0] = i;
+    for (let j = 1; j <= b.length; j++) {
+      const temp = prev[j];
+      prev[j] = Math.min(prev[j] + 1, prev[j - 1] + 1, diagonal + (a[i - 1] === b[j - 1] ? 0 : 1));
+      diagonal = temp;
+    }
+  }
+  return prev[b.length];
+}
+
+/** Si el dominio parece un error de tipeo (gmial.com, hotmial.com, gmail.con), devuelve el mail corregido */
+export function suggestEmail(raw: string): string | null {
+  const email = raw.trim().toLowerCase();
+  const at = email.lastIndexOf('@');
+  if (at < 1) return null;
+  const local = email.slice(0, at);
+  const domain = email.slice(at + 1);
+  if (!domain || KNOWN_DOMAINS.includes(domain)) return null;
+
+  let best: { domain: string; dist: number } | null = null;
+  for (const known of KNOWN_DOMAINS) {
+    const dist = distance(domain, known);
+    if (dist <= 2 && (!best || dist < best.dist)) best = { domain: known, dist };
+  }
+  return best ? `${local}@${best.domain}` : null;
+}

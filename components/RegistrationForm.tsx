@@ -1,13 +1,15 @@
 'use client';
 
-import { useId, useState, type FormEvent } from 'react';
+import { useId, useState, type FormEvent, type MouseEvent } from 'react';
 import { ESPECIALIDADES, OCUPACIONES, OCUPACION_ODONTOLOGO, type Texts } from '../lib/config';
 import {
+  suggestEmail,
   validateParticipant,
   type CleanParticipant,
   type FieldErrors,
   type ParticipantInput,
 } from '../lib/validation';
+import BasesModal from './BasesModal';
 
 interface Props {
   /** Textos editables desde /admin */
@@ -36,12 +38,20 @@ export default function RegistrationForm({ texts, initial, serverError, onReady 
   const [errors, setErrors] = useState<FieldErrors>(serverError ? { [serverError.field]: serverError.message } : {});
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
+  const [emailHint, setEmailHint] = useState<string | null>(null);
+  const [dismissedEmail, setDismissedEmail] = useState('');
+  const [showBases, setShowBases] = useState(false);
 
   const id = (name: string) => `${uid}-${name}`;
 
   function set<K extends keyof ParticipantInput>(key: K, value: ParticipantInput[K]) {
     setValues((prev) => ({ ...prev, [key]: value }));
     setErrors((prev) => (prev[key] ? { ...prev, [key]: undefined } : prev));
+  }
+
+  function checkEmailHint() {
+    const suggestion = suggestEmail(values.email);
+    setEmailHint(suggestion && dismissedEmail !== values.email.trim().toLowerCase() ? suggestion : null);
   }
 
   function focusFirstError() {
@@ -64,6 +74,14 @@ export default function RegistrationForm({ texts, initial, serverError, onReady 
       return;
     }
     setErrors({});
+
+    // Mail con pinta de error de tipeo (gmial.com, hotmial.com...): se pregunta una vez antes de seguir
+    const suggestion = suggestEmail(values.email);
+    if (suggestion && dismissedEmail !== values.email.trim().toLowerCase()) {
+      setEmailHint(suggestion);
+      document.getElementById(id('email'))?.focus();
+      return;
+    }
     setBusy(true);
 
     try {
@@ -181,7 +199,11 @@ export default function RegistrationForm({ texts, initial, serverError, onReady 
             spellCheck={false}
             placeholder="nombre@mail.com"
             value={values.email}
-            onChange={(e) => set('email', e.target.value)}
+            onChange={(e) => {
+              set('email', e.target.value);
+              setEmailHint(null);
+            }}
+            onBlur={checkEmailHint}
             aria-invalid={errors.email ? true : undefined}
             aria-describedby={errors.email ? id('email-error') : undefined}
           />
@@ -189,6 +211,33 @@ export default function RegistrationForm({ texts, initial, serverError, onReady 
             <p id={id('email-error')} className="dm-error">
               {errors.email}
             </p>
+          )}
+          {emailHint && (
+            <div className="email-hint" role="alert">
+              <span>
+                ¿Quisiste decir <strong>{emailHint}</strong>?
+              </span>
+              <div className="email-hint-actions">
+                <button
+                  type="button"
+                  onClick={() => {
+                    set('email', emailHint);
+                    setEmailHint(null);
+                  }}
+                >
+                  Sí, corregir
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDismissedEmail(values.email.trim().toLowerCase());
+                    setEmailHint(null);
+                  }}
+                >
+                  No, está bien
+                </button>
+              </div>
+            </div>
           )}
         </div>
 
@@ -250,7 +299,9 @@ export default function RegistrationForm({ texts, initial, serverError, onReady 
               onChange={(e) => set('acepto', e.target.checked)}
               aria-invalid={errors.acepto ? true : undefined}
             />
-            <span>{texts.consent}</span>
+            <span>
+              <ConsentText text={texts.consent} onOpen={() => setShowBases(true)} />
+            </span>
           </label>
           {errors.acepto && <p className="dm-error">{errors.acepto}</p>}
         </div>
@@ -265,6 +316,36 @@ export default function RegistrationForm({ texts, initial, serverError, onReady 
           {busy ? 'Verificando…' : texts.submit}
         </button>
       </form>
+      {showBases && <BasesModal text={texts.bases} onClose={() => setShowBases(false)} />}
     </div>
+  );
+}
+
+/** El texto del checkbox, con "bases y condiciones" como link que abre el pop-up de las bases */
+function ConsentText({ text, onOpen }: { text: string; onOpen: () => void }) {
+  const open = (e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onOpen();
+  };
+  const match = /bases y condiciones/i.exec(text);
+  if (!match) {
+    return (
+      <>
+        {text}{' '}
+        <button type="button" className="consent-link" onClick={open}>
+          Ver bases y condiciones
+        </button>
+      </>
+    );
+  }
+  return (
+    <>
+      {text.slice(0, match.index)}
+      <button type="button" className="consent-link" onClick={open}>
+        {match[0]}
+      </button>
+      {text.slice(match.index + match[0].length)}
+    </>
   );
 }

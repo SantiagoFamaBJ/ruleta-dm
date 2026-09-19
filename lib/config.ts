@@ -25,6 +25,9 @@ export const COLORS: Record<PrizeType, { bg: string; fg: string }> = {
 /** Link del botón y del QR del pop-up (el QR es el archivo public/qr-web.svg: si cambiás el link, hay que regenerarlo) */
 export const WEB_URL = 'https://dentalmedrano.com/?utm_source=ruleta&utm_medium=local&utm_campaign=semana-odontologo';
 
+/** Instagram de Dental Medrano (botón del pop-up) */
+export const INSTAGRAM_URL = 'https://www.instagram.com/dentalmedrano/';
+
 /** Logos: archivos PNG dentro de public/logos/. Si falta uno se muestra el texto. */
 export const LOGOS = {
   dm: '/logos/dm.png',
@@ -97,7 +100,35 @@ export interface Texts {
   ctaNote: string;
   cta: string;
   close: string;
+  bases: string;
+  ctaInstagram: string;
 }
+
+const DEFAULT_BASES = `BASES Y CONDICIONES - RULETA DE PREMIOS
+Semana del Odontólogo - Dental Medrano
+
+1. Organizador y lugar
+La acción "Ruleta de premios" es organizada por Dental Medrano (el "Organizador") y se realiza únicamente en forma presencial, en el local de Dental Medrano, durante los días de la Semana del Odontólogo en que el Organizador la habilite.
+
+2. Quiénes pueden participar
+Pueden participar personas mayores de 18 años que completen el formulario con datos verdaderos y acepten estas bases. Cada persona participa una sola vez: no se admite más de una participación con el mismo mail o el mismo celular.
+
+3. Cómo se participa
+Se completan los datos del formulario, se aceptan estas bases y se gira la ruleta una vez. El resultado lo define el sistema de manera aleatoria, no puede modificarse y todos los casilleros de la ruleta tienen la misma probabilidad de salir.
+
+4. Premios
+La ruleta puede dar un premio de las marcas COLTENE o Densell, un descuento del 10% en Dental Medrano, o el resultado "Seguí participando", que no otorga premio. Los premios se retiran en el local, en el momento, mostrando al personal de Dental Medrano la pantalla con el resultado. No son canjeables por dinero ni transferibles. El descuento del 10% se aplica según las condiciones que informe el personal del local al momento de la entrega.
+
+5. Datos personales
+Los datos que se ingresan (nombre, apellido, celular, mail, ocupación y especialidad) se usan para gestionar la participación y la entrega del premio y, con la aceptación de estas bases, para que Dental Medrano se comunique con la persona para enviarle novedades, ofertas y promociones por mail y por celular (incluido WhatsApp). Los datos se incorporan a una base de datos de Dental Medrano, responsable de su tratamiento, y solo se comparten con proveedores que prestan servicios de almacenamiento y envío de comunicaciones. La persona puede pedir en cualquier momento el acceso, la rectificación o la supresión de sus datos, y dejar de recibir comunicaciones, llamando al 11 6436-2400 o escribiendo desde dentalmedrano.com.
+
+El titular de los datos personales tiene la facultad de ejercer el derecho de acceso a los mismos en forma gratuita a intervalos no inferiores a seis meses, salvo que se acredite un interés legítimo al efecto conforme lo establecido en el artículo 14, inciso 3 de la Ley Nº 25.326. La Agencia de Acceso a la Información Pública, en su carácter de Órgano de Control de la Ley Nº 25.326, tiene la atribución de atender las denuncias y reclamos que interpongan quienes resulten afectados en sus derechos por incumplimiento de las normas vigentes en materia de protección de datos personales.
+
+6. Modificaciones y suspensión
+El Organizador puede modificar, suspender o cancelar la acción por razones técnicas o de fuerza mayor, y puede excluir participaciones con datos falsos o intentos de fraude.
+
+7. Aceptación
+La participación implica la aceptación de estas bases y condiciones.`;
 
 export const DEFAULT_TEXTS: Texts = {
   banner: '¡Feliz semana del Odontólogo!',
@@ -118,6 +149,8 @@ export const DEFAULT_TEXTS: Texts = {
   ctaNote: 'Conocé todo lo que tenemos para vos.',
   cta: 'Visitá dentalmedrano.com',
   close: 'Listo',
+  bases: DEFAULT_BASES,
+  ctaInstagram: 'Seguinos en Instagram',
 };
 
 export const TEXT_LIMITS: Record<keyof Texts, number> = {
@@ -139,6 +172,8 @@ export const TEXT_LIMITS: Record<keyof Texts, number> = {
   ctaNote: 80,
   cta: 40,
   close: 20,
+  bases: 8000,
+  ctaInstagram: 40,
 };
 
 /** Reemplaza {nombre} por el nombre de la persona */

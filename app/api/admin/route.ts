@@ -69,6 +69,15 @@ export async function POST(req: Request): Promise<Response> {
         return json({ ok: true });
       }
 
+      case 'deliver': {
+        const id = typeof body.id === 'string' ? body.id : '';
+        if (!UUID_RE.test(id) || typeof body.value !== 'boolean') return json({ error: 'Solicitud inválida.' }, 400);
+        const at = body.value ? new Date().toISOString() : null;
+        const { error } = await db().from(TABLE).update({ entregado: body.value, entregado_at: at }).eq('id', id);
+        if (error) throw error;
+        return json({ ok: true, entregado_at: at });
+      }
+
       case 'getConfig':
         return json({ config: await loadConfig() });
 

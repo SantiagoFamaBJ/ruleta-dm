@@ -36,6 +36,7 @@ const XLSX_COLUMNS: { header: string; key: string; width: number }[] = [
   { header: 'Ocupación', key: 'ocupacion', width: 16 },
   { header: 'Especialidad', key: 'especialidad', width: 26 },
   { header: 'Premio', key: 'premio', width: 24 },
+  { header: 'Entregado', key: 'entregado', width: 12 },
 ];
 
 export async function buildXlsx(rows: ParticipantRow[]): Promise<Buffer> {
@@ -57,6 +58,7 @@ export async function buildXlsx(rows: ParticipantRow[]): Promise<Buffer> {
       ocupacion: r.ocupacion,
       especialidad: r.especialidad ?? '',
       premio: r.premio,
+      entregado: r.premio_tipo === 'seguir' ? '' : r.entregado ? 'Sí' : 'No',
     });
   }
 

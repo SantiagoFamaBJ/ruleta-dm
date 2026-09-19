@@ -15,6 +15,8 @@ interface Row {
   especialidad: string | null;
   premio_tipo: PrizeType;
   premio: string;
+  entregado: boolean;
+  entregado_at: string | null;
 }
 
 const CATEGORIES: { type: PrizeType; label: string }[] = [
@@ -33,6 +35,7 @@ const TEXT_GROUPS: { title: string; hint?: string; fields: [keyof Texts, string,
       ['subtitle', 'Subtítulo', false],
       ['consent', 'Texto del checkbox (bases y datos)', true],
       ['submit', 'Botón para ir a la ruleta', false],
+      ['bases', 'Bases y condiciones (texto completo)', true],
     ],
   },
   {
@@ -57,6 +60,7 @@ const TEXT_GROUPS: { title: string; hint?: string; fields: [keyof Texts, string,
       ['lost', 'Mensaje cuando no sale premio', true],
       ['ctaNote', 'Texto arriba del botón de la web', false],
       ['cta', 'Botón que lleva a dentalmedrano.com', false],
+      ['ctaInstagram', 'Botón que lleva a Instagram', false],
       ['close', 'Botón para cerrar', false],
     ],
   },
@@ -80,6 +84,7 @@ export default function AdminPage() {
   const [tab, setTab] = useState<'participantes' | 'stats' | 'textos'>('participantes');
   const [config, setConfig] = useState<RuletaConfig>(DEFAULT_CONFIG);
   const [saved, setSaved] = useState('');
+  const [onlyPending, setOnlyPending] = useState(false);
 
   const counts = useMemo(() => {
     const c: Record<string, number> = {};
@@ -160,6 +165,28 @@ export default function AdminPage() {
       setBusy(false);
     }
   }
+
+  async function setDelivered(row: Row, value: boolean) {
+    setError('');
+    setBusy(true);
+    try {
+      const res = await call('deliver', { id: row.id, value });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error ?? 'No se pudo actualizar.');
+        return;
+      }
+      setRows((prev) =>
+        prev ? prev.map((r) => (r.id === row.id ? { ...r, entregado: value, entregado_at: data.entregado_at ?? null } : r)) : prev,
+      );
+    } catch {
+      setError('No hay conexión. Probá de nuevo.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const visibleRows = (rows ?? []).filter((r) => !onlyPending || (r.premio_tipo !== 'seguir' && !r.entregado));
 
   function setText(key: keyof Texts, value: string) {
     setSaved('');
@@ -277,7 +304,7 @@ export default function AdminPage() {
                           id={`t-${key}`}
                           className="dm-input"
                           style={{ height: 'auto', padding: '12px 16px' }}
-                          rows={3}
+                          rows={key === 'bases' ? 14 : 3}
                           maxLength={TEXT_LIMITS[key]}
                           value={config.texts[key]}
                           onChange={(e) => setText(key, e.target.value)}
@@ -391,6 +418,10 @@ export default function AdminPage() {
             Descargar CSV para Emblue
           </button>
           <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={onlyPending} onChange={(e) => setOnlyPending(e.target.checked)} />
+            <span>Solo premios sin entregar</span>
+          </label>
+          <label className="flex items-center gap-2 text-sm">
             <span>Separador del CSV</span>
             <select
               className="dm-input"
@@ -420,18 +451,19 @@ export default function AdminPage() {
                 <th className="px-4 py-3 font-semibold">Mail</th>
                 <th className="px-4 py-3 font-semibold">Ocupación</th>
                 <th className="px-4 py-3 font-semibold">Premio</th>
+                <th className="px-4 py-3 font-semibold">Entrega</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
             <tbody>
               {rows.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-10 text-center" style={{ color: 'var(--dm-muted)' }}>
+                  <td colSpan={8} className="px-4 py-10 text-center" style={{ color: 'var(--dm-muted)' }}>
                     Todavía no participó nadie.
                   </td>
                 </tr>
               )}
-              {rows.map((r) => (
+              {visibleRows.map((r) => (
                 <tr key={r.id} style={{ borderTop: '1px solid #ececec' }}>
                   <td className="whitespace-nowrap px-4 py-3">{dateFmt.format(new Date(r.created_at))}</td>
                   <td className="px-4 py-3 font-medium">
@@ -450,6 +482,36 @@ export default function AdminPage() {
                     >
                       {r.premio}
                     </span>
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3">
+                    {r.premio_tipo === 'seguir' ? (
+                      <span style={{ color: 'var(--dm-muted)' }}>—</span>
+                    ) : r.entregado ? (
+                      <span>
+                        <span className="font-semibold" style={{ color: '#2e7d32' }}>
+                          Entregado ✓
+                        </span>{' '}
+                        <button
+                          type="button"
+                          className="text-sm underline underline-offset-2"
+                          style={{ color: 'var(--dm-muted)' }}
+                          onClick={() => setDelivered(r, false)}
+                          disabled={busy}
+                        >
+                          Deshacer
+                        </button>
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        className="dm-btn dm-btn--sm dm-btn--ghost"
+                        style={{ height: 36, padding: '0 14px', fontSize: 14 }}
+                        onClick={() => setDelivered(r, true)}
+                        disabled={busy}
+                      >
+                        Marcar entregado
+                      </button>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <button
@@ -545,6 +607,8 @@ function StatsPanel({ rows }: { rows: Row[] }) {
       hoy: perDay.get(today) ?? 0,
       pctOdonto: rows.length ? Math.round((odontologos.length / rows.length) * 100) : 0,
       pctPremio: rows.length ? Math.round((ganaron / rows.length) * 100) : 0,
+      ganaron,
+      entregados: rows.filter((r) => r.premio_tipo !== 'seguir' && r.entregado).length,
       days,
       ocupacion: tally(rows.map((r) => r.ocupacion)),
       especialidad: tally(odontologos.map((r) => r.especialidad as string)),
@@ -563,6 +627,7 @@ function StatsPanel({ rows }: { rows: Row[] }) {
     ['Hoy', String(stats.hoy)],
     ['Odontólogos', `${stats.pctOdonto}%`],
     ['Ganaron premio', `${stats.pctPremio}%`],
+    ['Entregados', `${stats.entregados} de ${stats.ganaron}`],
   ];
 
   return (
@@ -570,7 +635,7 @@ function StatsPanel({ rows }: { rows: Row[] }) {
       <h1 className="screen-title" style={{ textAlign: 'left' }}>
         Estadísticas
       </h1>
-      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {kpis.map(([label, value]) => (
           <div key={label} className="rounded-2xl p-4" style={{ boxShadow: 'inset 0 0 0 1.5px var(--dm-line)' }}>
             <p className="text-sm" style={{ color: 'var(--dm-muted)' }}>

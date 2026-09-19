@@ -720,6 +720,7 @@ select.dm-input {
 }
 
 .dm-btn--cta {
+  height: 50px;
   color: var(--dm-orange-dark);
   font-size: 17px;
   text-decoration: none;
@@ -737,4 +738,86 @@ select.dm-input {
   .modal-body {
     padding: 18px 24px 20px;
   }
+}
+
+/* Bases y condiciones, corrector de mails y botones del pop-up */
+.consent-link {
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--dm-orange-dark);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.email-hint {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fff7e0;
+  color: #5d4500;
+  font-size: 15px;
+}
+
+.email-hint-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.email-hint-actions button {
+  height: 38px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: inset 0 0 0 1.5px #e0c56b;
+  color: inherit;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.email-hint-actions button:first-child {
+  background: var(--dm-orange);
+  box-shadow: none;
+  color: #fff;
+}
+
+.modal-cta-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bases-card {
+  display: flex;
+  flex-direction: column;
+  max-width: 560px;
+  text-align: left;
+}
+
+.bases-title {
+  padding: 22px 24px 12px;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.bases-body {
+  flex: 1;
+  padding: 0 24px 8px;
+  overflow-y: auto;
+  font-size: 15px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.bases-foot {
+  padding: 14px 24px 22px;
 }

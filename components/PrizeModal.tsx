@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, type CSSProperties } from 'react';
-import { COLORS, LOGOS, LOGO_STYLE, WEB_URL, fillName, type PrizeType, type Texts } from '../lib/config';
+import { COLORS, INSTAGRAM_URL, LOGOS, LOGO_STYLE, WEB_URL, fillName, type PrizeType, type Texts } from '../lib/config';
 import { useImageOk } from './Logo';
 
 interface Props {
@@ -68,7 +68,11 @@ export default function PrizeModal({ name, type, prize, texts, onClose }: Props)
 
   useEffect(() => {
     button.current?.focus();
-  }, []);
+    // Vibra al ganar (solo en celulares y tablets Android; en iPhone y iPad no existe esta función)
+    if (won && typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      navigator.vibrate([180, 90, 180, 90, 320]);
+    }
+  }, [won]);
 
   return (
     <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="prize-title">
@@ -95,9 +99,14 @@ export default function PrizeModal({ name, type, prize, texts, onClose }: Props)
           <p className="modal-note">{won ? texts.redeem : texts.lost}</p>
           <div className="modal-cta">
             <p className="modal-cta-note">{texts.ctaNote}</p>
-            <a className="dm-btn dm-btn--ghost dm-btn--cta" href={WEB_URL} target="_blank" rel="noopener noreferrer">
-              {texts.cta}
-            </a>
+            <div className="modal-cta-buttons">
+              <a className="dm-btn dm-btn--ghost dm-btn--cta" href={WEB_URL} target="_blank" rel="noopener noreferrer">
+                {texts.cta}
+              </a>
+              <a className="dm-btn dm-btn--ghost dm-btn--cta" href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
+                {texts.ctaInstagram}
+              </a>
+            </div>
           </div>
           <button ref={button} type="button" className="dm-btn" onClick={onClose}>
             {texts.close}

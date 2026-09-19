@@ -16,11 +16,13 @@ export interface ParticipantRow {
   premio_tipo: string;
   premio: string;
   gajo: number;
+  entregado: boolean;
+  entregado_at: string | null;
 }
 
 /** Columnas que se leen (no se trae el token ni el celular normalizado) */
 export const COLUMNS =
-  'id, created_at, nombre, apellido, celular, email, ocupacion, especialidad, premio_tipo, premio, gajo';
+  'id, created_at, nombre, apellido, celular, email, ocupacion, especialidad, premio_tipo, premio, gajo, entregado, entregado_at';
 
 let client: SupabaseClient | null = null;
 
