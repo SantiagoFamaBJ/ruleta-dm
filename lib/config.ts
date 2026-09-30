@@ -65,8 +65,9 @@ export const SLICES: Slice[] = [
 ];
 
 export const OCUPACION_ODONTOLOGO = 'Odontólogo/a';
+export const OCUPACION_OTRO = 'Otro';
 
-export const OCUPACIONES = ['Estudiante', OCUPACION_ODONTOLOGO, 'Otro'] as const;
+export const OCUPACIONES = ['Estudiante', OCUPACION_ODONTOLOGO, OCUPACION_OTRO] as const;
 
 /** Se muestran solo si la ocupación es Odontólogo/a */
 export const ESPECIALIDADES = [

@@ -83,6 +83,7 @@ export async function POST(req: Request): Promise<Response> {
       celular_norm: p.celularNorm,
       email: p.email,
       ocupacion: p.ocupacion,
+      ocupacion_otro: p.ocupacionOtro,
       especialidad: p.especialidad,
       premio_tipo: slice.type,
       premio: prize,

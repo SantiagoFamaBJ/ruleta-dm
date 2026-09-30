@@ -34,6 +34,7 @@ const XLSX_COLUMNS: { header: string; key: string; width: number }[] = [
   { header: 'Celular', key: 'celular', width: 16 },
   { header: 'Mail', key: 'email', width: 34 },
   { header: 'Ocupación', key: 'ocupacion', width: 16 },
+  { header: 'Detalle ocupación', key: 'ocupacionOtro', width: 22 },
   { header: 'Especialidad', key: 'especialidad', width: 26 },
   { header: 'Premio', key: 'premio', width: 24 },
   { header: 'Entregado', key: 'entregado', width: 12 },
@@ -56,6 +57,7 @@ export async function buildXlsx(rows: ParticipantRow[]): Promise<Buffer> {
       celular: r.celular,
       email: r.email,
       ocupacion: r.ocupacion,
+      ocupacionOtro: r.ocupacion_otro ?? '',
       especialidad: r.especialidad ?? '',
       premio: r.premio,
       entregado: r.premio_tipo === 'seguir' ? '' : r.entregado ? 'Sí' : 'No',
@@ -85,6 +87,7 @@ const CSV_COLUMNS: CsvColumn[] = [
   { header: 'apellido', get: (r) => r.apellido },
   { header: 'celular', get: (r) => r.celular.replace(/^\+/, '') }, // solo números
   { header: 'ocupacion', get: (r) => r.ocupacion },
+  { header: 'ocupacion_otro', get: (r) => r.ocupacion_otro ?? '' },
   { header: 'especialidad', get: (r) => r.especialidad ?? '' },
   { header: 'premio', get: (r) => r.premio },
 ];

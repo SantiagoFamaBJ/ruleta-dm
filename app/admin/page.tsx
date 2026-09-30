@@ -12,6 +12,7 @@ interface Row {
   celular: string;
   email: string;
   ocupacion: string;
+  ocupacion_otro: string | null;
   especialidad: string | null;
   premio_tipo: PrizeType;
   premio: string;
@@ -58,9 +59,6 @@ const TEXT_GROUPS: { title: string; hint?: string; fields: [keyof Texts, string,
       ['titleSeguir', 'Título cuando sale "Seguí participando"', false],
       ['redeem', 'Mensaje al ganar un premio', true],
       ['lost', 'Mensaje cuando no sale premio', true],
-      ['ctaNote', 'Texto arriba del botón de la web', false],
-      ['cta', 'Botón que lleva a dentalmedrano.com', false],
-      ['ctaInstagram', 'Botón que lleva a Instagram', false],
       ['close', 'Botón para cerrar', false],
       ['titleRetry', 'Título cuando sale "Intentá de nuevo"', false],
       ['retryKicker', 'Frase cuando sale "Intentá de nuevo"', false],
@@ -477,6 +475,7 @@ export default function AdminPage() {
                   <td className="px-4 py-3">{r.email}</td>
                   <td className="px-4 py-3">
                     {r.ocupacion}
+                    {r.ocupacion_otro ? ` (${r.ocupacion_otro})` : ''}
                     {r.especialidad ? ` · ${r.especialidad}` : ''}
                   </td>
                   <td className="px-4 py-3">

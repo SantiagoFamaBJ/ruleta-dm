@@ -12,6 +12,7 @@ export interface ParticipantRow {
   celular: string;
   email: string;
   ocupacion: string;
+  ocupacion_otro: string | null;
   especialidad: string | null;
   premio_tipo: string;
   premio: string;
@@ -22,7 +23,7 @@ export interface ParticipantRow {
 
 /** Columnas que se leen (no se trae el token ni el celular normalizado) */
 export const COLUMNS =
-  'id, created_at, nombre, apellido, celular, email, ocupacion, especialidad, premio_tipo, premio, gajo, entregado, entregado_at';
+  'id, created_at, nombre, apellido, celular, email, ocupacion, ocupacion_otro, especialidad, premio_tipo, premio, gajo, entregado, entregado_at';
 
 let client: SupabaseClient | null = null;
 

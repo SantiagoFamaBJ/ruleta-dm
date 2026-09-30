@@ -1,4 +1,4 @@
-import { ESPECIALIDADES, OCUPACIONES, OCUPACION_ODONTOLOGO } from './config';
+import { ESPECIALIDADES, OCUPACIONES, OCUPACION_ODONTOLOGO, OCUPACION_OTRO } from './config';
 
 export interface ParticipantInput {
   nombre: string;
@@ -6,6 +6,8 @@ export interface ParticipantInput {
   celular: string;
   email: string;
   ocupacion: string;
+  /** Solo cuando ocupacion es "Otro": qué escribió */
+  ocupacionOtro: string;
   especialidad: string;
   acepto: boolean;
 }
@@ -19,6 +21,7 @@ export interface CleanParticipant {
   celularNorm: string;
   email: string;
   ocupacion: string;
+  ocupacionOtro: string | null;
   especialidad: string | null;
 }
 
@@ -85,6 +88,11 @@ export function validateParticipant(input: unknown): ValidationResult {
   if (esOdontologo && !(ESPECIALIDADES as readonly string[]).includes(especialidad))
     errors.especialidad = 'Elegí tu especialidad.';
 
+  const ocupacionOtro = text(src.ocupacionOtro).trim().replace(/\s+/g, ' ');
+  const esOtro = ocupacion === OCUPACION_OTRO;
+  if (esOtro && (ocupacionOtro.length < 2 || ocupacionOtro.length > 60))
+    errors.ocupacionOtro = 'Contanos tu ocupación.';
+
   if (src.acepto !== true) errors.acepto = 'Tenés que aceptar para participar.';
 
   if (Object.keys(errors).length > 0) return { ok: false, errors };
@@ -98,6 +106,7 @@ export function validateParticipant(input: unknown): ValidationResult {
       celularNorm: phone.celularNorm,
       email,
       ocupacion,
+      ocupacionOtro: esOtro ? ocupacionOtro : null,
       especialidad: esOdontologo ? especialidad : null,
     },
   };

@@ -1,7 +1,7 @@
 'use client';
 
 import { useId, useState, type FormEvent, type MouseEvent } from 'react';
-import { ESPECIALIDADES, OCUPACIONES, OCUPACION_ODONTOLOGO, type Texts } from '../lib/config';
+import { ESPECIALIDADES, OCUPACIONES, OCUPACION_ODONTOLOGO, OCUPACION_OTRO, type Texts } from '../lib/config';
 import {
   suggestEmail,
   validateParticipant,
@@ -28,6 +28,7 @@ const EMPTY: ParticipantInput = {
   celular: '',
   email: '',
   ocupacion: '',
+  ocupacionOtro: '',
   especialidad: '',
   acepto: false,
 };
@@ -112,6 +113,7 @@ export default function RegistrationForm({ texts, initial, serverError, onReady 
   }
 
   const esOdontologo = values.ocupacion === OCUPACION_ODONTOLOGO;
+  const esOtro = values.ocupacion === OCUPACION_OTRO;
 
   return (
     <div className="form-wrap">
@@ -254,6 +256,7 @@ export default function RegistrationForm({ texts, initial, serverError, onReady 
                   onChange={() => {
                     set('ocupacion', option);
                     set('especialidad', '');
+                    set('ocupacionOtro', '');
                   }}
                 />
                 <span>{option}</span>
@@ -286,6 +289,29 @@ export default function RegistrationForm({ texts, initial, serverError, onReady 
             {errors.especialidad && (
               <p id={id('especialidad-error')} className="dm-error">
                 {errors.especialidad}
+              </p>
+            )}
+          </div>
+        )}
+
+        {esOtro && (
+          <div>
+            <label className="dm-label" htmlFor={id('ocupacionOtro')}>
+              Contanos cuál
+            </label>
+            <input
+              id={id('ocupacionOtro')}
+              className="dm-input"
+              type="text"
+              autoComplete="off"
+              value={values.ocupacionOtro}
+              onChange={(e) => set('ocupacionOtro', e.target.value)}
+              aria-invalid={errors.ocupacionOtro ? true : undefined}
+              aria-describedby={errors.ocupacionOtro ? id('ocupacionOtro-error') : undefined}
+            />
+            {errors.ocupacionOtro && (
+              <p id={id('ocupacionOtro-error')} className="dm-error">
+                {errors.ocupacionOtro}
               </p>
             )}
           </div>

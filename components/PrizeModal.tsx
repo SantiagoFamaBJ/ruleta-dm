@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, type CSSProperties } from 'react';
-import { COLORS, INSTAGRAM_URL, LOGOS, LOGO_STYLE, WEB_URL, fillName, type PrizeType, type Texts } from '../lib/config';
+import { COLORS, LOGOS, LOGO_STYLE, fillName, type PrizeType, type Texts } from '../lib/config';
 import { useImageOk } from './Logo';
 
 interface Props {
@@ -112,17 +112,6 @@ export default function PrizeModal({ name, type, prize, texts, onClose, onRetry 
           <div className="modal-body">
             {won && <p className="modal-prize">{prize}</p>}
             <p className="modal-note">{won ? texts.redeem : texts.lost}</p>
-            <div className="modal-cta">
-              <p className="modal-cta-note">{texts.ctaNote}</p>
-              <div className="modal-cta-buttons">
-                <a className="dm-btn dm-btn--ghost dm-btn--cta" href={WEB_URL} target="_blank" rel="noopener noreferrer">
-                  {texts.cta}
-                </a>
-                <a className="dm-btn dm-btn--ghost dm-btn--cta" href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
-                  {texts.ctaInstagram}
-                </a>
-              </div>
-            </div>
             <button ref={button} type="button" className="dm-btn" onClick={onClose}>
               {texts.close}
             </button>

@@ -153,6 +153,8 @@ export default function Wheel({ onSpin, onStop, resetKey = 0 }: WheelProps) {
                       preserveAspectRatio="xMidYMid meet"
                       filter={LOGO_STYLE === 'blanco' ? 'url(#logo-blanco)' : undefined}
                     />
+                  ) : slice.type === 'descuento' ? (
+                    <GiftIcon cx={cx} cy={CY} fill={color.fg} />
                   ) : (
                     <text className="wheel-label" textAnchor="middle" fill={color.fg} fontSize={size}>
                       {lines.map((line, k) => (
@@ -206,5 +208,18 @@ export default function Wheel({ onSpin, onStop, resetKey = 0 }: WheelProps) {
         {label}
       </button>
     </div>
+  );
+}
+
+/** Ícono de regalo (reemplaza el texto "10% OFF" en el gajo del descuento) */
+function GiftIcon({ cx, cy, fill }: { cx: number; cy: number; fill: string }) {
+  const s = 1.8; // escala: el ícono viene en un viewBox de 24x24
+  return (
+    <g transform={`translate(${cx - 12 * s} ${cy - 12 * s}) scale(${s})`}>
+      <path
+        d="M20 6h-2.18c.11-.31.18-.65.18-1a2.996 2.996 0 0 0-5.5-1.65l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm6 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM20 19H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z"
+        fill={fill}
+      />
+    </g>
   );
 }
