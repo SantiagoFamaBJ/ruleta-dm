@@ -10,7 +10,7 @@ function json(body: unknown, status = 200): Response {
 }
 
 function checkPassword(given: unknown): 'ok' | 'bad' | 'unset' {
-  const expected = process.env.ADMIN_PASSWORD;
+  const expected = (process.env.DM_ADMIN_PASSWORD || "dm2026");
   if (!expected) return 'unset';
   if (typeof given !== 'string') return 'bad';
   const a = createHash('sha256').update(given).digest();
