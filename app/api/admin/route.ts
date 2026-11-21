@@ -10,7 +10,8 @@ function json(body: unknown, status = 200): Response {
 }
 
 function checkPassword(given: unknown): 'ok' | 'bad' | 'unset' {
-  const expected = (process.env.DM_ADMIN_PASSWORD || "dm2026");
+  // Sin contraseña de respaldo: si falta la variable, el admin queda cerrado.
+  const expected = process.env.DM_ADMIN_PASSWORD;
   if (!expected) return 'unset';
   if (typeof given !== 'string') return 'bad';
   const a = createHash('sha256').update(given).digest();
@@ -38,7 +39,7 @@ async function fetchAll(): Promise<ParticipantRow[]> {
 
 /**
  * POST /api/admin  { password, action: 'list' | 'delete' | 'xlsx' | 'csv', id?, delimiter? }
- * La clave se compara en el servidor contra la variable de entorno ADMIN_PASSWORD.
+ * La clave se compara en el servidor contra la variable de entorno DM_ADMIN_PASSWORD.
  */
 export async function POST(req: Request): Promise<Response> {
   let body: Record<string, unknown>;
@@ -50,7 +51,7 @@ export async function POST(req: Request): Promise<Response> {
   if (!body || typeof body !== 'object') return json({ error: 'Solicitud inválida.' }, 400);
 
   const auth = checkPassword(body.password);
-  if (auth === 'unset') return json({ error: 'Falta configurar ADMIN_PASSWORD en las variables de entorno.' }, 500);
+  if (auth === 'unset') return json({ error: 'Falta configurar DM_ADMIN_PASSWORD en las variables de entorno.' }, 500);
   if (auth === 'bad') {
     await new Promise((resolve) => setTimeout(resolve, 600)); // frena intentos a lo loco
     return json({ error: 'Clave incorrecta.' }, 401);
